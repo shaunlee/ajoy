@@ -949,6 +949,14 @@ class AjoyView extends AjoyComponent implements IAjoyView
     /**
      *
      */
+    public function datetime($value, $format = 'Y-m-d h:i:s')
+    {
+        return date($format, strtotime($value));
+    }
+
+    /**
+     *
+     */
     public function widget($name, array $options = array())
     {
         $widgetPath = str_replace('.', '/', $name) . '.php';
@@ -971,8 +979,7 @@ class AjoyView extends AjoyComponent implements IAjoyView
         return $content;
     }
 
-    /**        $this->layouts[] = $template;
-        ob_start();
+    /**
      * Begin extends with layouts
      *
      * @param string $template layout view

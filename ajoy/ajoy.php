@@ -211,9 +211,7 @@ class AjoyDatabase extends AjoyComponent implements IAjoyDatabase
 
     private function solvePrefix($sql)
     {
-        if ($this->prefix)
-            $sql = preg_replace('/\{(\w+)\}/', $this->prefix . '$1', $sql);
-        return $sql;
+        return preg_replace('/\{(\w+)\}/', ($this->prefix ? $this->prefix : '') . '$1', $sql);
     }
 
     public function begin()
@@ -920,6 +918,11 @@ class AjoyView extends AjoyComponent implements IAjoyView
     /**
      *
      */
+    private $defines = array();
+
+    /**
+     *
+     */
     private $viewsPath;
 
     /**
@@ -1008,6 +1011,18 @@ class AjoyView extends AjoyComponent implements IAjoyView
             include $filename;
         } else
             echo $content;
+    }
+
+    public function beginDefine($varname)
+    {
+        $this->defines[] = $varname;
+        ob_start();
+    }
+
+    public function endDefine()
+    {
+        $varname = array_pop($this->defines);
+        $content = $this->context[$varname] = ob_get_clean();
     }
 
     /**

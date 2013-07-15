@@ -62,20 +62,17 @@ class AjoyDatabase extends AjoyComponent implements IAjoyDatabase
     {
         $args = func_get_args();
         $sql = array_shift($args);
-        $params = is_array($args[0]) ? $args[0] : $args;
+        if (count($args) && is_array($args[0]))
+            $args = array_shift($args);
 
         $sth = $this->db()->prepare($this->solvePrefix($sql));
-        $sth->execute($params);
+        $sth->execute($args);
     }
 
     /**
-     * @example
-     *      $fields = new stdClass;
-     *      $fields->field = 'value';
-     *      app()->db->insert('{table}', $fields);
      *
-     *      app()->db->query()->one|all|scalar;
-     *      app()->db->command()->insert|update|delete;
+     * @example
+     *      app()->db->insert('{table}', array('foo' => 'bar'))
      *
      * @param string $table
      * @param object $fields
@@ -100,7 +97,7 @@ class AjoyDatabase extends AjoyComponent implements IAjoyDatabase
             . ') VALUES (' . implode(', ', $marks) . ')';
 
         $sth = $this->db()->prepare($sql);
-#var_dump($sth, $fields);
+
         if ($sth->execute($fields)) {
             $sequence = null;
             if ($this->is('pgsql')) {
@@ -114,6 +111,9 @@ class AjoyDatabase extends AjoyComponent implements IAjoyDatabase
     }
 
     /**
+     *
+     * @example
+     *      app()->db->update('{table}', array('foo' => 'bar'), array('uid' => 1))
      *
      */
     public function update($table, array $fields, array $conditions)
@@ -143,6 +143,9 @@ class AjoyDatabase extends AjoyComponent implements IAjoyDatabase
 
     /**
      *
+     * @example
+     *      app()->db->delete('{table}', array('uid' => 1))
+     *
      */
     public function delete($table, array $conditions)
     {
@@ -165,33 +168,59 @@ class AjoyDatabase extends AjoyComponent implements IAjoyDatabase
      *
      * @example
      *      app()->db->one('SELECT * FROM {table} LIMIT 1')
-     *      app()->db->one('SELECT * FROM {table} WHERE uid = ?', array(1))
+     *      app()->db->one('SELECT * FROM {table} WHERE uid = ?', 1)
+     *      app()->db->one('SELECT * FROM {table} WHERE uid = :uid', array('uid' => 1))
      *
      */
-    public function one($sql, array $params = null)
+    public function one($sql)
     {
+        $args = func_get_args();
+        $sql = array_shift($args);
+        if (count($args) && is_array($args[0]))
+            $args = array_shift($args);
+
         $sth = $this->db()->prepare($this->solvePrefix($sql));
-        $sth->execute($params);
+        $sth->execute($args);
         return $sth->fetch();
     }
 
     /**
      *
+     * @example
+     *      app()->db->all('SELECT * FROM {table}')
+     *      app()->db->all('SELECT * FROM {table} WHERE uid > ?', 1)
+     *      app()->db->all('SELECT * FROM {table} WHERE uid > :uid', array('uid' => 1))
+     *
      */
-    public function all($sql, array $params = null)
+    public function all($sql)
     {
+        $args = func_get_args();
+        $sql = array_shift($args);
+        if (count($args) && is_array($args[0]))
+            $args = array_shift($args);
+
         $sth = $this->db()->prepare($this->solvePrefix($sql));
-        $sth->execute($params);
+        $sth->execute($args);
         return $sth->fetchAll();
     }
 
     /**
      *
+     * @example
+     *      app()->db->scalar('SELECT count(*) FROM {table}')
+     *      app()->db->scalar('SELECT count(*) FROM {table} WHERE uid > ?', 1)
+     *      app()->db->scalar('SELECT count(*) FROM {table} WHERE uid > :uid', array('uid' => 1))
+     *
      */
-    public function scalar($sql, array $params = null)
+    public function scalar($sql)
     {
+        $args = func_get_args();
+        $sql = array_shift($args);
+        if (count($args) && is_array($args[0]))
+            $args = array_shift($args);
+
         $sth = $this->db()->prepare($this->solvePrefix($sql));
-        $sth->execute($params);
+        $sth->execute($args);
         return $sth->fetchColumn();
     }
 

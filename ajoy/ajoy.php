@@ -159,9 +159,9 @@ interface IAjoyDbCommand
 
 interface IAjoyDbQuery
 {
-    public function one($sql, array $params = null);
-    public function all($sql, array $params = null);
-    public function scalar($sql, array $params = null);
+    public function one($sql);
+    public function all($sql);
+    public function scalar($sql);
 }
 
 interface IAjoyDatabase extends IAjoyDbCommand, IAjoyDbQuery

@@ -13,7 +13,9 @@ Ajoy web framework, yet another php web framework just for fun.
     ));
 
     app()->get('/', funciton ($req, $res) {
-        $res->send(app()->get('title'));
+        $res->render('index', array(
+            'official_site' => 'https://github.com/shaunlee/ajoy',
+        ));
     });
 
     app()->run();

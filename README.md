@@ -4,6 +4,8 @@ Ajoy web framework, yet another php web framework just for fun.
 
 ### examples
 
+    defined('ROOT') or define('ROOT', dirname(__file__) . '/..');
+
     app()->configure(array(
         'app root' => ROOT,
     ));

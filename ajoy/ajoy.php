@@ -405,22 +405,6 @@ class AjoyRequest extends AjoyComponent
     }
 
     /**
-     * Read or write field that parsed from the $uri
-     *
-     * @param string $field
-     * @param mixed $value
-     *
-     * @return mixed
-     */
-    public function param($field, $value = null)
-    {
-        static $params = array();
-        if ($value === null)
-            return isset($params[$field]) ? $params[$field] : null;
-        $params[$field] = $value;
-    }
-
-    /**
      * Read field from the $_GET
      *
      * @param string $field
@@ -1222,7 +1206,7 @@ final class AjoyApp extends AjoyComponent
         foreach ($this->routes[$method] as $pattern => $row) {
             if (preg_match($row['regex'], $uri, $matches)) {
                 foreach ($row['fields'] as $i => $field)
-                    $this->request->param($field, urldecode($matches[$i + 1]));
+                    $_GET[$field] = urldecode($matches[$i + 1]);
 
                 $this->emit(strtolower($method) . ' ' . $pattern);
 

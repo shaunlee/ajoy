@@ -1210,7 +1210,13 @@ final class AjoyApp extends AjoyComponent
      */
     private function dispatch()
     {
-        $uri = isset($_GET['q']) ? $_GET['q'] : '/';
+        if (isset($_GET['q']))
+            $uri = $_GET['q'];
+        elseif (isset($_SERVER['PATH_INFO']))
+            $uri = $_SERVER['PATH_INFO'];
+        else
+            $uri = '/';
+
         $method = $_SERVER['REQUEST_METHOD'];
         $found = false;
         foreach ($this->routes[$method] as $pattern => $row) {

@@ -6,7 +6,7 @@ app()->module('/blog', array(
             $res->send('Blog entries');
         },
         '/<int:id>' => function ($req, $res) {
-            $res->send('Blog entry ' . $req->param('id'));
+            $res->send('Blog entry ' . $req->query('id'));
         },
     ),
 ));

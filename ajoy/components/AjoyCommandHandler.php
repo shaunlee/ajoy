@@ -49,10 +49,11 @@ class AjoyCommandHandler extends AjoyComponent
 
     public function init()
     {
-        app()->post($this->urlPattern, function ($req, $res) {
+        $handler = $this;
+        app()->post($this->urlPattern, function ($req, $res) use ($handler) {
             $result = array();
             foreach ($req->bodies() as $command => $data)
-                $result[$command] = app()->command->handle($command, $data);
+                $result[$command] = $handler->handle($command, $data);
             $res->json($result);
         });
     }

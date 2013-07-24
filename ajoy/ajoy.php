@@ -715,9 +715,15 @@ class AjoyView extends AjoyComponent implements IAjoyView
     /**
      *
      */
+    private $themesPath;
+
+    /**
+     *
+     */
     public function init()
     {
         $this->viewsPath = app()->get('app root') . '/views';
+        $this->themesPath = app()->get('app root') . '/themes';
     }
 
     /**
@@ -750,7 +756,7 @@ class AjoyView extends AjoyComponent implements IAjoyView
     public function widget($name, array $options = array())
     {
         $widgetPath = str_replace('.', '/', $name) . '.php';
-        $filename = app()->get('app root') . '/themes/' . app()->get('theme') . '/widgets/' . $widgetPath;
+        $filename = $this->themesPath . '/' . app()->get('theme') . '/widgets/' . $widgetPath;
         if (!file_exists($filename))
             $filename = app()->get('app root') . '/views/widgets/' . $widgetPath;
         if (!file_exists($filename))
@@ -792,7 +798,9 @@ class AjoyView extends AjoyComponent implements IAjoyView
         $content = $this->context[$varname] = ob_get_clean();
 
         $template = array_pop($this->layouts);
-        $filename = $this->viewsPath . '/' . $template . '.php';
+        $filename = $this->themesPath . '/' . app()->get('theme') . '/' . $template . '.php';
+        if (!file_exists($filename))
+            $filename = $this->viewsPath . '/' . $template . '.php';
         if (file_exists($filename)) {
             extract($this->context);
             include $filename;
@@ -824,7 +832,9 @@ class AjoyView extends AjoyComponent implements IAjoyView
     {
         $this->context = ajoy_array_merge(app()->locals(), $context);
 
-        $filename = $this->viewsPath . '/' . $template . '.php';
+        $filename = $this->themesPath . '/' . app()->get('theme') . '/' . $template . '.php';
+        if (!file_exists($filename))
+            $filename = $this->viewsPath . '/' . $template . '.php';
         if (!file_exists($filename))
             app()->raise('Views file with name "' . $this->viewsPath . '/' . $template . '.php" does not exists.');
 

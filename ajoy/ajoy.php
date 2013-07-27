@@ -362,13 +362,37 @@ class AjoyValidation extends AjoyComponent
 
     public function validRegex($field, $pattern, $message = 'Field `%s` is invalid.')
     {
-        if (!preg_match($pattern, $this->get($field)))
+        $value = $this->get($field);
+        if ($value && !preg_match($pattern, $value))
             $this->lastErrors[$field] = sprintf($message, $field);
     }
 
     public function validEmail($field, $message = 'Invalid email format.')
     {
-        if (!preg_match('/\w+@\w+\.\w+/', $this->get($field)))
+        $value = $this->get($field);
+        if ($value && !preg_match('/^\w+@\w+(\.\w+){1,3}$/', $value))
+            $this->lastErrors[$field] = sprintf($message, $field);
+    }
+
+    public function validNumber($field, $message = 'Invalid number.')
+    {
+        $value = $this->get($field);
+        if ($value && !preg_match('/^\d+$/', $value))
+            $this->lastErrors[$field] = sprintf($message, $field);
+    }
+
+    public function validAtLeastOne($field, $other_fields, $message = 'At least one of these fields required.')
+    {
+        $fields = preg_split('/,\s*/', $other_fields);
+        array_unshift($fields, $field);
+        $valid = false;
+        foreach ($fields as $key) {
+            if ($this->get($key) != '') {
+                $valid = true;
+                break;
+            }
+        }
+        if (!$valid)
             $this->lastErrors[$field] = sprintf($message, $field);
     }
 }

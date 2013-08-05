@@ -1232,6 +1232,8 @@ final class AjoyApp extends AjoyComponent
             $uri = $_GET['q'];
         elseif (isset($_SERVER['PATH_INFO']))
             $uri = $_SERVER['PATH_INFO'];
+        elseif (isset($_SERVER['REQUEST_URI']))
+            $uri = $_SERVER['REQUEST_URI'];
         else
             $uri = '/';
 

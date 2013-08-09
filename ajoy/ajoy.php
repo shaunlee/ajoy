@@ -395,6 +395,43 @@ class AjoyValidation extends AjoyComponent
         if (!$valid)
             $this->lastErrors[$field] = sprintf($message, $field);
     }
+
+    public function validCurrency($field, $message = 'Invalid currency.')
+    {
+        $value = $this->get($field);
+        if ($value && !preg_match('/^\d+(\.\d{1,2})?$/', $value))
+            $this->lastErrors[$field] = sprintf($message, $field);
+    }
+
+    public function validComparison($field, $other_field, $operator = '==', $message = 'Invalid value.')
+    {
+        $value = $this->get($field);
+        $other_value = $this->get($other_field);
+        switch ($operator) {
+            case '==':
+                $matched = $value == $other_value;
+                break;
+            case '!=':
+                $matched = $value != $other_value;
+                break;
+            case '>':
+                $matched = $value > $other_value;
+                break;
+            case '<':
+                $matched = $value < $other_value;
+                break;
+            case '>=':
+                $matched = $value >= $other_value;
+                break;
+            case '<=':
+                $matched = $value <= $other_value;
+                break;
+            default:
+                app()->raise('Comparison validator operator "' . $operator . '" is invalid.');
+        }
+        if (!$matched)
+            $this->lastErrors[$field] = sprintf($message, $field);
+    }
 }
 
 /**

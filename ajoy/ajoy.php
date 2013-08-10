@@ -586,21 +586,23 @@ class AjoyResponse extends AjoyComponent
      *
      * @return string
      */
-    private function completeStatus($status)
+    public function completeStatus($code, $statusOnly = false)
     {
         static $commonStatus = array(
-            200 => '200 OK',
-            301 => '301 Moved Permanently',
-            302 => '302 Found',
-            303 => '303 See Other',
-            400 => '400 Bad Request',
-            401 => '401 Unauthorized',
-            403 => '403 Forbidden',
-            404 => '404 Not Found',
-            500 => '500 Internal Server Error',
-            501 => '501 Not Implemented',
+            200 => 'OK',
+            301 => 'Moved Permanently',
+            302 => 'Found',
+            303 => 'See Other',
+            400 => 'Bad Request',
+            401 => 'Unauthorized',
+            403 => 'Forbidden',
+            404 => 'Not Found',
+            500 => 'Internal Server Error',
+            501 => 'Not Implemented',
         );
-        return isset($commonStatus[$status]) ? $commonStatus[$status] : $status;
+        return isset($commonStatus[$code])
+            ? ($statusOnly ? $commonStatus[$code] : ($code . ' ' . $commonStatus[$code]))
+            : $code;
     }
 
     /**
@@ -999,9 +1001,9 @@ final class AjoyApp extends AjoyComponent
         if (!isset($components[$name]) && isset($this->settings['components'][$name])) {
             $cfg = $this->settings['components'][$name];
             if (!isset($cfg['class']))
-                app()->raise('Missing `class` for component "' . $name . '".');
+                $this->raise('Missing `class` for component "' . $name . '".');
             if (isset($cfg['interface']) && !is_subclass_of($cfg['class'], $cfg['interface']))
-                app()->raise('Component "' . $cfg['class'] . '" should be subclass of "' . $cfg['interface'] . '".');
+                $this->raise('Component "' . $cfg['class'] . '" should be subclass of "' . $cfg['interface'] . '".');
 
             $comp = $components[$name] = $cfg['class']::instance();
 
@@ -1285,19 +1287,25 @@ final class AjoyApp extends AjoyComponent
 
                 $handlers = is_callable($row['fn']) ? array($row['fn']) : $row['fn'];
                 foreach ($handlers as $fn)
-                    call_user_func($fn, app()->request, app()->response);
+                    call_user_func($fn, $this->request, $this->response);
                 $found = true;
                 break;
             }
         }
-        if (!$found) {
-            $this->emit('error404');
+        if (!$found)
+            $this->error(404);
+    }
 
-            if (AJOY_ENV === 'production')
-                app()->response->render('error404', 404);
-            else
-                app()->response->send('Page Not Found', 404);
-        }
+    public function error($code)
+    {
+        $this->emit('error' . $code);
+
+        if (AJOY_ENV === 'production')
+            $this->response->render('error' . $code, $code);
+        else
+            $this->response->send($this->response->completeStatus($code, true), $code);
+
+        $this->end();
     }
 
     /**

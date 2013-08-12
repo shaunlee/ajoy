@@ -1277,6 +1277,9 @@ final class AjoyApp extends AjoyComponent
             $uri = '/';
 
         $method = $_SERVER['REQUEST_METHOD'];
+        if (!isset($this->routes[$method]))
+            $this->error(404);
+
         $found = false;
         foreach ($this->routes[$method] as $pattern => $row) {
             if (preg_match($row['regex'], $uri, $matches)) {

@@ -29,7 +29,7 @@ class AjoyDatabase extends AjoyComponent implements IAjoyDatabase
     public function init()
     {
         $db = $this->dbconn = new PDO($this->dsn, $this->user, $this->password, array(
-            PDO::ATTR_PERSISTENT => true,
+            #PDO::ATTR_PERSISTENT => true,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_OBJ,
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
         ));

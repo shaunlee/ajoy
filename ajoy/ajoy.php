@@ -792,30 +792,6 @@ class AjoyView extends AjoyComponent implements IAjoyView
     /**
      *
      */
-    public function encode($value)
-    {
-        return htmlspecialchars($value);
-    }
-
-    /**
-     *
-     */
-    public function linebreaksbr($value)
-    {
-        return preg_replace('/(\r?\n)/', '<br>$1', $value);
-    }
-
-    /**
-     *
-     */
-    public function datetime($value, $format = 'Y-m-d h:i:s')
-    {
-        return date($format, strtotime($value));
-    }
-
-    /**
-     *
-     */
     public function widget($name, array $options = array())
     {
         $widgetPath = str_replace('.', '/', $name) . '.php';
@@ -910,6 +886,15 @@ class AjoyView extends AjoyComponent implements IAjoyView
             return $content;
 
         echo $content;
+    }
+
+    public function __call($method, $arguments)
+    {
+        $helper = ViewHelper::instance();
+        if (method_exists($helper, $method))
+            return call_user_func_array(array($helper, $method), $arguments);
+
+        throw new Exception('Call to undefined method AjoyView::' . $method . '()');
     }
 }
 
@@ -1320,6 +1305,9 @@ final class AjoyApp extends AjoyComponent
 
         spl_autoload_register(array($this, 'loadComponents'));
         spl_autoload_register(array($this, 'loadModels'));
+
+        if ($this->get('timezone'))
+            date_default_timezone_set($this->get('timezone'));
 
         $this->emit('init');
 

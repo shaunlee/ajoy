@@ -1,6 +1,6 @@
 <?php
 
-class EasyView extends AjoyComponent implements IAjoyView
+class EasyView extends ViewHelper implements IAjoyView
 {
 
     /**
@@ -31,6 +31,11 @@ class EasyView extends AjoyComponent implements IAjoyView
     /**
      *
      */
+    public $minify = false;
+
+    /**
+     *
+     */
     public function init()
     {
         $this->viewsPath = app()->get('app root') . '/views';
@@ -55,6 +60,25 @@ class EasyView extends AjoyComponent implements IAjoyView
         $this->context[$variable] = $ctx;
     }
 
+    private function renderFile($filename, $fn)
+    {
+        $args = array_slice(func_get_args(), 2);
+        foreach ($args as $arg)
+            extract($arg);
+
+        ob_start();
+        include $filename;
+        $ctx = ob_get_clean();
+
+        if (is_callable($fn))
+            $ctx = $fn($ctx);
+
+        if ($this->minify)
+            $ctx = $this->minify($ctx);
+
+        return $ctx;
+    }
+
     public function render($template, array $context = array(), $return = false)
     {
         $filename = $this->themesPath . '/' . app()->get('theme') . '/' . $template . '.php';
@@ -63,18 +87,30 @@ class EasyView extends AjoyComponent implements IAjoyView
         if (!file_exists($filename))
             app()->raise('Views file with name "' . $this->viewsPath . '/' . $template . '.php" does not exists.');
 
-        extract(app()->locals());
-        extract($this->context);
-        extract($context);
+        $ctx = call_user_func_array(array($this, 'renderFile'), array($filename, function($ctx) {
+            if (!empty($this->layouts)) {
+                $layout = array_pop($this->layouts);
+                $ctx = $this->render($layout, array(), true);
+            }
+            return $ctx;
+        }, app()->locals(), $this->context, $context));
 
-        ob_start();
-        include $filename;
-        $ctx = ob_get_clean();
+        if ($return)
+            return $ctx;
 
-        if (!empty($this->layouts)) {
-            $layout = array_pop($this->layouts);
-            $ctx = $this->render($layout, array(), true);
-        }
+        echo $ctx;
+    }
+
+    public function renderPartial($template, array $context = array(), $return = false)
+    {
+        $filename = $this->themesPath . '/' . app()->get('theme') . '/' . $template . '.php';
+        if (!file_exists($filename))
+            $filename = $this->viewsPath . '/' . $template . '.php';
+        if (!file_exists($filename))
+            app()->raise('Views file with name "' . $this->viewsPath . '/' . $template . '.php" does not exists.');
+
+        $ctx = call_user_func_array(array($this, 'renderFile'),
+            array($filename, null, app()->locals(), $this->context, $context));
 
         if ($return)
             return $ctx;
@@ -96,23 +132,20 @@ class EasyView extends AjoyComponent implements IAjoyView
         if (!file_exists($filename))
             app()->raise('Widget with name "' . $name . '" does not exists.');
 
-        extract($options);
-        ob_start();
-        include $filename;
-        $content = ob_get_clean();
+        $ctx = call_user_func_array(array($this, 'renderFile'), array($filename, null, $options));
 
+        if ($this->minify)
+            $ctx = $this->minify($ctx);
+
+        return $ctx;
+    }
+
+    public function minify($content)
+    {
         $content = preg_replace('/\s+(\w+=)/', ' $1', $content);
-        $content = preg_replace('/\s+>/', '>', $content);
-        $content = preg_replace('/(>)\s+|\s+(<)/', '$1$2', $content);
+        $content = preg_replace('/(\s+>|>\s+)/', '>', $content);
+        $content = preg_replace('/\s+</', '<', $content);
         return $content;
     }
 
-    public function __call($method, $arguments)
-    {
-        $helper = ViewHelper::instance();
-        if (method_exists($helper, $method))
-            return call_user_func_array(array($helper, $method), $arguments);
-
-        throw new Exception('Call to undefined method EasyView::' . $method . '()');
-    }
 }

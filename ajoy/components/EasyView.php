@@ -119,7 +119,7 @@ class EasyView extends ViewHelper implements IAjoyView
         echo $ctx;
     }
 
-    public function renderPartial($template, array $context = array(), $return = false)
+    public function includes($template, array $context = array(), $return = false)
     {
         $filename = $this->themesPath . '/' . app()->get('theme') . '/' . $template . '.php';
         if (!file_exists($filename))

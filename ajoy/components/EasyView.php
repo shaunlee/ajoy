@@ -6,6 +6,11 @@ class EasyView extends ViewHelper implements IAjoyView
     /**
      *
      */
+    public $strict = false;
+
+    /**
+     *
+     */
     private $blocks = array();
 
     /**
@@ -70,6 +75,10 @@ class EasyView extends ViewHelper implements IAjoyView
 
     private function renderFile($filename, $fn)
     {
+        $old_error_reporting = error_reporting();
+        if ($this->strict === false)
+            error_reporting(E_ALL ^ E_WARNING ^ E_NOTICE);
+
         $args = array_slice(func_get_args(), 2);
         foreach ($args as $arg)
             extract($arg);
@@ -84,6 +93,7 @@ class EasyView extends ViewHelper implements IAjoyView
         if ($this->minify)
             $ctx = $this->minify($ctx);
 
+        error_reporting($old_error_reporting);
         return $ctx;
     }
 

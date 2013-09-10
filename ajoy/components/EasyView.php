@@ -6,7 +6,7 @@ class EasyView extends ViewHelper implements IAjoyView
     /**
      *
      */
-    private $context = array();
+    private $blocks = array();
 
     /**
      *
@@ -50,14 +50,22 @@ class EasyView extends ViewHelper implements IAjoyView
     public function block($variable)
     {
         array_push($this->variables, $variable);
+        if (!isset($this->blocks[$variable])) {
+            $this->blocks[$variable] = array();
+        }
         ob_start();
     }
 
     public function endblock()
     {
         $ctx = ob_get_clean();
+
         $variable = array_pop($this->variables);
-        $this->context[$variable] = $ctx;
+        array_push($this->blocks[$variable], $ctx);
+
+        if (empty($this->layouts)) {
+            echo array_shift($this->blocks[$variable]);
+        }
     }
 
     private function renderFile($filename, $fn)
@@ -93,7 +101,7 @@ class EasyView extends ViewHelper implements IAjoyView
                 $ctx = $this->render($layout, array(), true);
             }
             return $ctx;
-        }, app()->locals(), $this->context, $context));
+        }, app()->locals(), $context));
 
         if ($return)
             return $ctx;
@@ -110,7 +118,7 @@ class EasyView extends ViewHelper implements IAjoyView
             app()->raise('Views file with name "' . $this->viewsPath . '/' . $template . '.php" does not exists.');
 
         $ctx = call_user_func_array(array($this, 'renderFile'),
-            array($filename, null, app()->locals(), $this->context, $context));
+            array($filename, null, app()->locals(), $context));
 
         if ($return)
             return $ctx;

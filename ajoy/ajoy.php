@@ -1345,26 +1345,19 @@ final class AjoyApp extends AjoyComponent
      */
     public function loadModules()
     {
-        static $loadedModules = array();
-
-        foreach ($this->get('modules') as $module) {
-            if (isset($loadedModules[$module]))
-                continue;
-
-            $paths = explode('.', $module);
-            $modfile = '/modules/' . implode('/', $paths) . '.php';
+        array_map(function($module) {
+            $modfile = '/modules/' . $module . '.php';
 
             $filename = $this->get('app root') . $modfile;
-            if (!file_exists($filename))
+            if (!file_exists($filename)) {
                 $filename = $this->get('ajoy root') . $modfile;
 
-            if (!file_exists($filename))
-                $this->raise('Module with name "' . $module . '" does not exists.');
+                if (!file_exists($filename))
+                    $this->raise('Module with name "' . $module . '" does not exists.');
+            }
 
             include $filename;
-
-            $loadedModules[$module] = true;
-        }
+        }, $this->get('modules'));
     }
 
     /**

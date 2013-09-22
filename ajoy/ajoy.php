@@ -1348,12 +1348,12 @@ final class AjoyApp extends AjoyComponent
         array_map(function($module) {
             $modfile = '/modules/' . $module . '.php';
 
-            $filename = $this->get('app root') . $modfile;
+            $filename = app()->get('app root') . $modfile;
             if (!file_exists($filename)) {
-                $filename = $this->get('ajoy root') . $modfile;
+                $filename = app()->get('ajoy root') . $modfile;
 
                 if (!file_exists($filename))
-                    $this->raise('Module with name "' . $module . '" does not exists.');
+                    app()->raise('Module with name "' . $module . '" does not exists.');
             }
 
             include $filename;

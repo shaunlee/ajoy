@@ -105,10 +105,10 @@ class EasyView extends ViewHelper implements IAjoyView
         if (!file_exists($filename))
             app()->raise('Views file with name "' . $this->viewsPath . '/' . $template . '.php" does not exists.');
 
-        $layouts = &$this->layouts;
-        $ctx = call_user_func_array(array($this, 'renderFile'), array($filename, function($ctx) use ($layouts) {
-            if (!empty($layouts)) {
-                $layout = array_pop($layouts);
+        $view = $this;
+        $ctx = call_user_func_array(array($this, 'renderFile'), array($filename, function($ctx) use ($view) {
+            if (!empty($view->layouts)) {
+                $layout = array_pop($view->layouts);
                 $ctx = $this->render($layout, array(), true);
             }
             return $ctx;
